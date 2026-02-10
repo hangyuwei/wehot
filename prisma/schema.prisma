@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  title       String
+  summary     String   @db.Text
+  url         String   @unique
+  coverUrl    String?
+  accountName String
+  readCount   Int      @default(0)
+  likeCount   Int      @default(0)
+  publishedAt DateTime
+  fetchedAt   DateTime @default(now())
+  category    String
+  keywords    Json     @default("[]")
+
+  @@index([category])
+  @@index([publishedAt])
+  @@index([readCount])
+  @@map("articles")
+}
+
+model Subscription {
+  id          String   @id @default(cuid())
+  accountName String   @unique
+  accountId   String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@map("subscriptions")
+}
+
+model KeywordConfig {
+  id        String   @id @default(cuid())
+  keyword   String   @unique
+  category  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([category])
+  @@map("keyword_configs")
+}
