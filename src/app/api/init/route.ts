@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
-    // 用原始 SQL 创建表结构
+    // 创建 articles 表
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "articles" (
         "id" TEXT NOT NULL,
@@ -19,13 +19,14 @@ export async function GET() {
         "category" TEXT NOT NULL,
         "keywords" JSONB NOT NULL DEFAULT '[]',
         CONSTRAINT "articles_pkey" PRIMARY KEY ("id")
-      );
-      CREATE UNIQUE INDEX IF NOT EXISTS "articles_url_key" ON "articles"("url");
-      CREATE INDEX IF NOT EXISTS "articles_category_idx" ON "articles"("category");
-      CREATE INDEX IF NOT EXISTS "articles_publishedAt_idx" ON "articles"("publishedAt");
-      CREATE INDEX IF NOT EXISTS "articles_readCount_idx" ON "articles"("readCount");
+      )
     `)
+    await prisma.$executeRawUnsafe(`CREATE UNIQUE INDEX IF NOT EXISTS "articles_url_key" ON "articles"("url")`)
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "articles_category_idx" ON "articles"("category")`)
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "articles_publishedAt_idx" ON "articles"("publishedAt")`)
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "articles_readCount_idx" ON "articles"("readCount")`)
 
+    // 创建 subscriptions 表
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "subscriptions" (
         "id" TEXT NOT NULL,
@@ -34,10 +35,11 @@ export async function GET() {
         "isActive" BOOLEAN NOT NULL DEFAULT true,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT "subscriptions_pkey" PRIMARY KEY ("id")
-      );
-      CREATE UNIQUE INDEX IF NOT EXISTS "subscriptions_accountName_key" ON "subscriptions"("accountName");
+      )
     `)
+    await prisma.$executeRawUnsafe(`CREATE UNIQUE INDEX IF NOT EXISTS "subscriptions_accountName_key" ON "subscriptions"("accountName")`)
 
+    // 创建 keyword_configs 表
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "keyword_configs" (
         "id" TEXT NOT NULL,
@@ -46,10 +48,10 @@ export async function GET() {
         "isActive" BOOLEAN NOT NULL DEFAULT true,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT "keyword_configs_pkey" PRIMARY KEY ("id")
-      );
-      CREATE UNIQUE INDEX IF NOT EXISTS "keyword_configs_keyword_key" ON "keyword_configs"("keyword");
-      CREATE INDEX IF NOT EXISTS "keyword_configs_category_idx" ON "keyword_configs"("category");
+      )
     `)
+    await prisma.$executeRawUnsafe(`CREATE UNIQUE INDEX IF NOT EXISTS "keyword_configs_keyword_key" ON "keyword_configs"("keyword")`)
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "keyword_configs_category_idx" ON "keyword_configs"("category")`)
 
     // 插入默认关键词
     const keywordsCount = await prisma.keywordConfig.count()
